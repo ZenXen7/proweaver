@@ -35,7 +35,7 @@ export default class NextLevel extends Phaser.Scene {
           this.center_width,
           this.center_height - 50,
           "arcade",
-          `Score: ${this.previousScore}`,
+          `Evidence: ${this.previousScore}`,
           25
         )
         .setOrigin(0.5);
@@ -47,7 +47,7 @@ export default class NextLevel extends Phaser.Scene {
           this.center_width,
           this.center_height,
           "arcade",
-          "NEXT LEVEL",
+          "CORRUPTION EXPOSED!",
           45
         )
         .setOrigin(0.5);
@@ -59,7 +59,7 @@ export default class NextLevel extends Phaser.Scene {
           this.center_width,
           this.center_height + 50,
           "arcade",
-          "Press SPACE or Click to start!",
+          "Press SPACE to continue the fight!",
           15
         )
         .setOrigin(0.5);

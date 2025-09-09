@@ -17,7 +17,6 @@ class GameLevel extends Phaser.Scene {
   }
 
 
-  
     preload() {
 
 
@@ -25,15 +24,15 @@ class GameLevel extends Phaser.Scene {
       this.load.image("background", "./assets/images/Ground.png");
 
       this.load.image("character1", "assets/images/worker-final.png");
-      this.load.image("character2", "assets/images/watercharacter.png");
+      this.load.image("character2", "assets/images/woman.png");
 
       this.load.audio("coin", "./assets/audio/coin.mp3");
       this.load.audio("jump", "./assets/audio/jump.mp3");
       this.load.audio("levelEnd", "./assets/audio/levelEnd.mp3");
       this.load.audio("theme", "./assets/audio/theme.mp3");
       
-      this.load.image("coin", "./assets/images/diamond.png");
-      this.load.image("coin2", "./assets/images/fire.png");
+      this.load.image("coin", "./assets/images/burger.png");
+      this.load.image("coin2", "./assets/images/cash.png");
       this.load.image("wall", "./assets/images/Wall.png");
       this.load.image("wallBtn", "./assets/images/wallBtn.png");
       this.load.image("heart" , "../assets/images/heart.png")
@@ -54,24 +53,23 @@ class GameLevel extends Phaser.Scene {
     }
 
 
-
-
-
-
-
-
-  
     create() {
 
     this.Data = structuredClone(this.intialData);
    
     this.levelStartTime = Math.floor(new Date().getTime() / 1000);
+    
+    this.waterLevel = this.cameras.main.height + 50;
+    this.waterRiseSpeed = this.Data.waterRiseSpeed || 0.8;
+    this.maxLevelTime = this.Data.timeLimit || 45000;
+    this.levelStartTime = Date.now();
+    this.waterActive = false;
 
 
 
 
       this.createModernBackground();
-      
+
       const background = this.add.image(
         this.cameras.main.centerX,
         this.cameras.main.centerY,
@@ -190,13 +188,24 @@ class GameLevel extends Phaser.Scene {
   
       this.score = 0;
   
-      this.scoreText = this.add.text(26, 4, "Score: 0", {
+      this.scoreText = this.add.text(26, 4, "Evidence: 0", {
         fontSize: "26px",
         fill: "#fff",
         fontFamily: "Arial, sans-serif",
         stroke: "#000",
         strokeThickness: 2
       }).setScrollFactor(0).setDepth(5);
+
+      this.timeText = this.add.text(26, 35, "Time: 60s", {
+        fontSize: "16px",
+        fill: "#fff",
+        fontFamily: "Arial, sans-serif",
+        stroke: "#000",
+        strokeThickness: 2
+      }).setScrollFactor(0).setDepth(5);
+
+      this.waterLevelIndicator = this.add.graphics();
+      this.waterLevelIndicator.setScrollFactor(0).setDepth(5);
 
       if (window.updateGameUI) {
         window.updateGameUI({
@@ -242,12 +251,10 @@ class GameLevel extends Phaser.Scene {
       this.character2.setDepth(2);
 
 
-     /* this.physics.world.createDebugGraphic();
-      this.character1.setDebug(true, true, 0xff0000);
-      this.character2.setDebug(true, true, 0xff0000);*/
   
       this.createCoins();
       this.createHearts();
+      this.createWaterVisual();
       this.setupTouchControls();
     }
 
@@ -478,7 +485,7 @@ class GameLevel extends Phaser.Scene {
       this.theme.stop();
       this.theme.play({
         mute: false,
-        volume: 0.1,
+        volume: 0.5,
         rate: 1,
         detune: 0,
         seek: 0,
@@ -491,9 +498,8 @@ class GameLevel extends Phaser.Scene {
 
 
   
-    update() {// a continouees infinite loop till the level ends
-
-      // Update modern character effects
+    update() {
+      this.updateWaterLevel();
       this.updateCharacterEffects();
 
       this.character1.setVelocityX(0);
@@ -578,38 +584,15 @@ class GameLevel extends Phaser.Scene {
 
 
 
-this.Data.fire.forEach( (item)=>{
-  /*console.log("in");
-  console.log(item[0]);
-  console.log(item[1]);*/
-
-if (x2 > item[0]-17   &&   x2 <= item[0]+17  &&   y2 > item[1]-8   &&    y2 <= item[1]+8) {
-
- this.character2.x = x2 + 70;/**/
-
- this.hearts--;
- this.loseHeart();
-}
-}      
-)
-
-
-
-
-this.Data.water.forEach( (item)=>{
-
-
-if (x1 > item[0]-17   &&   x1 <= item[0]+17  &&   y1 > item[1]-8   &&    y1 <= item[1]+8) {
-
- this.character1.x = x1 - 70;
-
- this.hearts--;
- this.loseHeart();
-
-
-}
-}      
-) 
+if (this.waterActive && this.waterLevel < this.cameras.main.height) {
+      const char1Bottom = this.character1.y + this.character1.height;
+      const char2Bottom = this.character2.y + this.character2.height;
+      
+      if (char1Bottom >= this.waterLevel || char2Bottom >= this.waterLevel) {
+        this.gameOver('drowned');
+        return;
+      }
+    } 
 
 
 
@@ -618,9 +601,121 @@ if (x1 > item[0]-17   &&   x1 <= item[0]+17  &&   y1 > item[1]-8   &&    y1 <= i
 
       //this.dimensionsText.setText(Math.floor(this.character2.x) + " x "+Math.floor(this.character2.y))
 
+    }
 
+    createWaterVisual() {
+      this.waterGraphics = this.add.graphics();
+      this.waterGraphics.setDepth(3);
+      this.waterGraphics.setScrollFactor(0);
       
+      this.waterSurface = this.add.graphics();
+      this.waterSurface.setDepth(4);
+      this.waterSurface.setScrollFactor(0);
+    }
 
+    updateWaterLevel() {
+      const elapsedTime = Date.now() - this.levelStartTime;
+      const gracePeriod = 10000;
+      
+      if (elapsedTime < gracePeriod) {
+        this.waterActive = false;
+        this.waterLevel = this.cameras.main.height + 50;
+        this.renderWater();
+        this.updateWaterUI(elapsedTime);
+        return;
+      }
+      
+      this.waterActive = true;
+      const adjustedElapsedTime = elapsedTime - gracePeriod;
+      const timeProgress = Math.min(1.0, adjustedElapsedTime / this.maxLevelTime);
+      
+      if (timeProgress >= 1.0) {
+        this.gameOver('timeout');
+        return;
+      }
+      
+      const screenHeight = this.cameras.main.height;
+      const waterStartLevel = screenHeight + 50;
+      const waterEndLevel = screenHeight - 200;
+      
+      this.waterLevel = waterStartLevel - (timeProgress * (waterStartLevel - waterEndLevel));
+      
+      this.renderWater();
+      this.updateWaterUI(elapsedTime);
+    }
+
+    updateWaterUI(elapsedTime) {
+      const gracePeriod = 10000;
+      
+      if (elapsedTime < gracePeriod) {
+        const graceRemaining = Math.ceil((gracePeriod - elapsedTime) / 1000);
+        this.timeText.setFill('#00ff00');
+        this.timeText.setText(`Grace period: ${graceRemaining}s`);
+        
+        this.waterLevelIndicator.clear();
+        this.waterLevelIndicator.fillStyle(0x00ff00, 0.8);
+        this.waterLevelIndicator.fillRect(this.cameras.main.width - 25, 80, 15, 100);
+        return;
+      }
+      
+      const adjustedElapsedTime = Math.max(0, elapsedTime - gracePeriod);
+      const remainingTime = Math.max(0, this.maxLevelTime - adjustedElapsedTime);
+      const seconds = Math.ceil(remainingTime / 1000);
+      
+      this.timeText.setFill(remainingTime < 10000 ? '#ff4757' : '#ffffff');
+      this.timeText.setText(`Flood in: ${seconds}s`);
+      
+      const waterStartLevel = this.cameras.main.height + 50;
+      const waterEndLevel = this.cameras.main.height - 200;
+      const waterProgress = Math.max(0, Math.min(1, (waterStartLevel - this.waterLevel) / (waterStartLevel - waterEndLevel)));
+      this.waterLevelIndicator.clear();
+      this.waterLevelIndicator.fillStyle(0x0096ff, 0.8);
+      this.waterLevelIndicator.fillRect(this.cameras.main.width - 25, 80, 15, 100);
+      this.waterLevelIndicator.fillStyle(0x0064c8, 0.9);
+      this.waterLevelIndicator.fillRect(this.cameras.main.width - 23, 80 + (100 * (1 - waterProgress)), 11, 100 * waterProgress);
+      
+      this.waterLevelIndicator.fillStyle(0xffffff);
+      this.add.text(this.cameras.main.width - 17, 195, 'Flood', {
+        fontSize: '12px',
+        fill: '#ffffff',
+        fontFamily: 'Arial',
+        align: 'center'
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(5);
+    }
+
+    renderWater() {
+      this.waterGraphics.clear();
+      this.waterSurface.clear();
+      
+      if (this.waterLevel < this.cameras.main.height) {
+        this.waterGraphics.fillStyle(0x0064c8, 0.7);
+        this.waterGraphics.fillRect(0, this.waterLevel, this.cameras.main.width, this.cameras.main.height - this.waterLevel);
+        
+        this.waterSurface.fillStyle(0x0096ff, 0.9);
+        this.waterSurface.fillRect(0, this.waterLevel - 8, this.cameras.main.width, 8);
+        
+        for (let i = 0; i < this.cameras.main.width; i += 15) {
+          const waveHeight = Math.sin((Date.now() * 0.008) + (i * 0.03)) * 4;
+          this.waterSurface.fillStyle(0x64c8ff, 0.95);
+          this.waterSurface.fillRect(i, this.waterLevel + waveHeight - 3, 12, 3);
+        }
+        
+        this.waterSurface.fillStyle(0xc8f0ff, 0.3);
+        for (let i = 0; i < 5; i++) {
+          const bubbleX = (Date.now() * 0.02 + i * 150) % this.cameras.main.width;
+          const bubbleY = this.waterLevel + 20 + Math.sin(Date.now() * 0.003 + i) * 10;
+          if (bubbleY < this.cameras.main.height) {
+            this.waterSurface.fillCircle(bubbleX, bubbleY, 2 + Math.sin(Date.now() * 0.01 + i) * 1);
+          }
+        }
+      }
+    }
+
+    gameOver(reason) {
+      this.gameOverReason = reason;
+      this.playAudio("gameOverSound");
+      this.theme.stop();
+      this.scene.start("gameover", { scores: [this.score], reason: reason });
     }
 
 
@@ -640,7 +735,7 @@ if (x1 > item[0]-17   &&   x1 <= item[0]+17  &&   y1 > item[1]-8   &&    y1 <= i
   
     updateScore(points = 0) {
       this.score += points;
-      this.scoreText.setText("Score: " + this.score);
+      this.scoreText.setText("Evidence: " + this.score);
       
       // Update the external modern UI
       if (window.updateGameUI) {

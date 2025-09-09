@@ -26,7 +26,7 @@ export default class GameStart extends Phaser.Scene {
                 this.center_width,
                 this.center_height - 40,
                 "arcade",
-                "ELEMENTAL DUO",
+                "FLOOD ESCAPE",
                 35
             )
             .setOrigin(0.5)
@@ -38,7 +38,7 @@ export default class GameStart extends Phaser.Scene {
                 this.center_width,
                 this.center_height,
                 "arcade",
-                "ADVENTURE BEGINS",
+                "BEAT THE BAHA",
                 20
             )
             .setOrigin(0.5)
@@ -50,7 +50,7 @@ export default class GameStart extends Phaser.Scene {
                 this.center_width,
                 this.center_height + 50,
                 "arcade",
-                "PRESS SPACE OR CLICK TO START",
+                "PRESS SPACE OR CLICK TO EXPOSE CORRUPTION",
                 12
             )
             .setOrigin(0.5)

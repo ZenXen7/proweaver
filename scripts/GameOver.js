@@ -5,8 +5,8 @@ export default class GameOver extends Phaser.Scene {
 
     init(data) {
         this.scores = data.scores;
-        console.log(data)
-
+        this.gameOverReason = data.reason || 'default';
+        console.log(data);
     }
 
     create() {
@@ -17,12 +17,19 @@ export default class GameOver extends Phaser.Scene {
 
         this.cameras.main.setBackgroundColor(0x79c4eb);
 
+        let gameOverMessage = "Corruption wins :(";
+        if (this.gameOverReason === 'drowned') {
+            gameOverMessage = "The flood of corruption caught you!";
+        } else if (this.gameOverReason === 'timeout') {
+            gameOverMessage = "The corruption spread too fast!";
+        }
+
         this.add
             .bitmapText(
                 this.center_width,
                 this.center_height - 220,
                 "arcade", 
-                "You lost :(",
+                gameOverMessage,
                 45
             )
             .setOrigin(0.5);
@@ -34,7 +41,7 @@ export default class GameOver extends Phaser.Scene {
                 this.center_width,
                 this.center_height - 160,
                 "arcade", 
-                "Your Scores:",
+                "Evidence Collected:",
                 40
             )
             .setOrigin(0.5);
@@ -62,7 +69,7 @@ export default class GameOver extends Phaser.Scene {
                 this.center_width,
                 this.center_height + this.scores.length * lineHeight + 30,
                 "arcade",
-                "Press SPACE or Click to restart!",
+                "Press SPACE or Click to try exposing corruption again!",
                 15
             )
             .setOrigin(0.5);
