@@ -27,7 +27,7 @@ const data1 = {
     ],
 
     timeLimit: 60000,
-    waterRiseSpeed: 1.5
+    waterRiseSpeed: 3.0
 }
 
 
@@ -44,7 +44,7 @@ var data2 = {
     ],
     
     timeLimit: 50000,
-    waterRiseSpeed: 1.8
+    waterRiseSpeed: 3.6
 }
 
 
@@ -61,7 +61,7 @@ const data3 = {
     ],
     
     timeLimit: 40000,
-    waterRiseSpeed: 2.2
+    waterRiseSpeed: 4.4
 }
 
 // levelkey,  map name , data object
