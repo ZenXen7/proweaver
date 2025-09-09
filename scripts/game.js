@@ -4,17 +4,6 @@ import GameLevel from "./level.js";
 import NextLevel from "./next.js";
 import GameStart from "./start.js";
 
-
-
-
-
-
-
-
-/*
-  A data object for every level
-*/
-
 const data1 = {
     waterCoinsX:[288, 430 , 667 , 700, 136 ,430, 750, 276 ],
     waterCoinsy:[130, 230, 220  , 130, 318, 430, 510, 606 ],
@@ -27,7 +16,7 @@ const data1 = {
     ],
 
     timeLimit: 60000,
-    waterRiseSpeed: 3.0
+    waterRiseSpeed: 0.3
 }
 
 
@@ -44,7 +33,7 @@ var data2 = {
     ],
     
     timeLimit: 50000,
-    waterRiseSpeed: 3.6
+    waterRiseSpeed: 0.4
 }
 
 
@@ -61,19 +50,13 @@ const data3 = {
     ],
     
     timeLimit: 40000,
-    waterRiseSpeed: 4.4
+    waterRiseSpeed: 0.5
 }
 
 // levelkey,  map name , data object
 var GameLevel1 = new GameLevel("level1", "tilemap1",data1);
 var GameLevel2 = new GameLevel("level2", "tilemap2",data2);
 var GameLevel3 = new GameLevel("level3", "tilemap3",data3);
-
-
-
-
-
-
 
 
 var config = {

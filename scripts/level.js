@@ -559,23 +559,28 @@ class GameLevel extends Phaser.Scene {
 
 
 
-if (this.waterActive && this.waterLevel < this.cameras.main.height - 20) {
-      // Use the actual sprite display bounds for visual accuracy
-      // Since origin is (0.5, 1), the sprite bottom is at character.y
-      const char1SpriteBottom = this.character1.y;
-      const char2SpriteBottom = this.character2.y;
+if (this.waterActive && this.waterLevel < this.cameras.main.height) {
+      // Ensure water is significantly visible before allowing collision
+      const waterVisibilityThreshold = this.cameras.main.height - 30;
       
-      // Water surface matches the visual surface (accounting for the 8px surface layer)
-      const visualWaterSurface = this.waterLevel - 8;
-      
-      // Only trigger if sprite actually touches the visible water surface
-      const char1TouchingWater = char1SpriteBottom >= visualWaterSurface;
-      const char2TouchingWater = char2SpriteBottom >= visualWaterSurface;
-      
-      if (char1TouchingWater || char2TouchingWater) {
-        console.log(`Sprite collision! Water surface: ${visualWaterSurface.toFixed(0)}, Char1 bottom: ${char1SpriteBottom.toFixed(0)}, Char2 bottom: ${char2SpriteBottom.toFixed(0)}`);
-        this.gameOver('drowned');
-        return;
+      if (this.waterLevel < waterVisibilityThreshold) {
+        // Use the actual sprite display bounds for visual accuracy
+        // Since origin is (0.5, 1), the sprite bottom is at character.y
+        const char1SpriteBottom = this.character1.y;
+        const char2SpriteBottom = this.character2.y;
+        
+        // Water surface matches the visual surface (accounting for the 8px surface layer)
+        const visualWaterSurface = this.waterLevel - 8;
+        
+        // Only trigger if sprite actually touches the visible water surface
+        const char1TouchingWater = char1SpriteBottom >= visualWaterSurface;
+        const char2TouchingWater = char2SpriteBottom >= visualWaterSurface;
+        
+        if (char1TouchingWater || char2TouchingWater) {
+          console.log(`Sprite collision! Water surface: ${visualWaterSurface.toFixed(0)}, Char1 bottom: ${char1SpriteBottom.toFixed(0)}, Char2 bottom: ${char2SpriteBottom.toFixed(0)}`);
+          this.gameOver('drowned');
+          return;
+        }
       }
     } 
 
@@ -606,18 +611,19 @@ if (this.waterActive && this.waterLevel < this.cameras.main.height - 20) {
       
       this.waterActive = true;
       const adjustedElapsedTime = elapsedTime - gracePeriod;
-      const timeProgress = Math.min(1.0, adjustedElapsedTime / this.maxLevelTime);
       
-      if (timeProgress >= 1.0) {
+      // Use waterRiseSpeed for direct pixel-per-second rising
+      const screenHeight = this.cameras.main.height;
+      const waterStartLevel = screenHeight - 20; // Start at bottom of screen (visible)
+      const pixelsRisen = (adjustedElapsedTime / 1000) * this.waterRiseSpeed * 60; // Convert to pixels per frame
+      
+      this.waterLevel = waterStartLevel - pixelsRisen;
+      
+      // Check if water has risen too high (game over condition)
+      if (this.waterLevel < screenHeight - 500) {
         this.gameOver('timeout');
         return;
       }
-      
-      const screenHeight = this.cameras.main.height;
-      const waterStartLevel = screenHeight + 50;
-      const waterEndLevel = screenHeight - 200;
-      
-      this.waterLevel = waterStartLevel - (timeProgress * (waterStartLevel - waterEndLevel));
       
       this.renderWater();
       this.updateWaterUI(elapsedTime);
