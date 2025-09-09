@@ -560,19 +560,20 @@ class GameLevel extends Phaser.Scene {
 
 
 if (this.waterActive && this.waterLevel < this.cameras.main.height - 20) {
-      // Use the physics body bottom position for accurate collision
-      const char1Bottom = this.character1.y + (this.character1.body.height * 0.5);
-      const char2Bottom = this.character2.y + (this.character2.body.height * 0.5);
+      // Use the actual sprite display bounds for visual accuracy
+      // Since origin is (0.5, 1), the sprite bottom is at character.y
+      const char1SpriteBottom = this.character1.y;
+      const char2SpriteBottom = this.character2.y;
       
-      // Water surface with wave consideration (add 4px buffer for waves)
-      const waterSurfaceWithWaves = this.waterLevel - 4;
+      // Water surface matches the visual surface (accounting for the 8px surface layer)
+      const visualWaterSurface = this.waterLevel - 8;
       
-      // Only trigger if character's feet are actually submerged in water
-      const char1InWater = char1Bottom > waterSurfaceWithWaves;
-      const char2InWater = char2Bottom > waterSurfaceWithWaves;
+      // Only trigger if sprite actually touches the visible water surface
+      const char1TouchingWater = char1SpriteBottom >= visualWaterSurface;
+      const char2TouchingWater = char2SpriteBottom >= visualWaterSurface;
       
-      if (char1InWater || char2InWater) {
-        console.log(`Water collision detected! Water surface: ${waterSurfaceWithWaves.toFixed(0)}, Char1 bottom: ${char1Bottom.toFixed(0)}, Char2 bottom: ${char2Bottom.toFixed(0)}`);
+      if (char1TouchingWater || char2TouchingWater) {
+        console.log(`Sprite collision! Water surface: ${visualWaterSurface.toFixed(0)}, Char1 bottom: ${char1SpriteBottom.toFixed(0)}, Char2 bottom: ${char2SpriteBottom.toFixed(0)}`);
         this.gameOver('drowned');
         return;
       }
