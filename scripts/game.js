@@ -1,6 +1,6 @@
 import end from "./end.js";
-import GameOver from "./GameOver.js";
-import GameLevel from "./GameLevel.js";
+import GameOver from "./over.js";
+import GameLevel from "./level.js";
 import NextLevel from "./next.js";
 import GameStart from "./start.js";
 
@@ -27,7 +27,7 @@ const data1 = {
     ],
 
     timeLimit: 60000,
-    waterRiseSpeed: 0.8
+    waterRiseSpeed: 1.5
 }
 
 
@@ -44,7 +44,7 @@ var data2 = {
     ],
     
     timeLimit: 50000,
-    waterRiseSpeed: 1.0
+    waterRiseSpeed: 1.8
 }
 
 
@@ -61,7 +61,7 @@ const data3 = {
     ],
     
     timeLimit: 40000,
-    waterRiseSpeed: 1.2
+    waterRiseSpeed: 2.2
 }
 
 // levelkey,  map name , data object

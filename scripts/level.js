@@ -13,7 +13,7 @@ class GameLevel extends Phaser.Scene {
   }
 
   init(data){
-    this.hearts = data.hearts
+    // Hearts system removed
   }
 
 
@@ -26,7 +26,7 @@ class GameLevel extends Phaser.Scene {
       this.load.image("character1", "./assets/images/worker-final.png");
       this.load.image("character2", "./assets/images/woman.png");
 
-      this.load.audio("coin", "./assets/audio/coin.mp3");
+      this.load.audio("coin", "./assets/audio/paldo.mp3");
       this.load.audio("jump", "./assets/audio/jump.mp3");
       this.load.audio("levelEnd", "./assets/audio/levelEnd.mp3");
       this.load.audio("theme", "./assets/audio/theme.mp3");
@@ -38,8 +38,8 @@ class GameLevel extends Phaser.Scene {
       this.load.image("heart" , "./assets/images/heart.png");
       this.load.image("door" , "./assets/images/door.png");
       
-      this.load.audio("wallOpen" , "./assets/audio/wallOpen.mp3");
-      this.load.audio("wallClose" , "./assets/audio/wallClose.mp3");
+      this.load.audio("wallOpen" , "./assets/audio/door.mp3");
+      this.load.audio("wallClose" , "./assets/audio/door.mp3");
       this.load.audio("lose" , "./assets/audio/lose.mp3");
       this.load.audio("gameOverSound" , "./assets/audio/gameOver.mp3");
       
@@ -79,7 +79,9 @@ class GameLevel extends Phaser.Scene {
       background.displayWidth = this.cameras.main.width;
       background.displayHeight = this.cameras.main.height;
       background.setScrollFactor(0);
-      background.setAlpha(0.3); 
+      background.setAlpha(0.3);
+
+      this.createRainEffect(); 
   
       const map = this.make.tilemap({
         key: this.mapName,
@@ -253,7 +255,6 @@ class GameLevel extends Phaser.Scene {
 
   
       this.createCoins();
-      this.createHearts();
       this.createWaterVisual();
       this.setupTouchControls();
     }
@@ -311,7 +312,7 @@ class GameLevel extends Phaser.Scene {
         
         // Add modern coin effects
         coin.setTint(0x4ecdc4);
-        coin.setScale(0.8);
+        coin.setScale(1.2);
         
         // Add floating animation
         this.tweens.add({
@@ -327,7 +328,7 @@ class GameLevel extends Phaser.Scene {
         });
         
         // Add subtle glow
-        const coinGlow = this.add.circle(x, y, 15, 0x4ecdc4, 0.2);
+        const coinGlow = this.add.circle(x, y, 20, 0x4ecdc4, 0.2);
         coinGlow.setDepth(0);
         this.tweens.add({
           targets: coinGlow,
@@ -354,7 +355,7 @@ class GameLevel extends Phaser.Scene {
         
         // Add modern coin effects
         coin2.setTint(0xff6b35);
-        coin2.setScale(0.8);
+        coin2.setScale(1.2);
         
         // Add floating animation
         this.tweens.add({
@@ -370,7 +371,7 @@ class GameLevel extends Phaser.Scene {
         });
         
         // Add subtle glow
-        const coinGlow = this.add.circle(x, y, 15, 0xff6b35, 0.2);
+        const coinGlow = this.add.circle(x, y, 20, 0xff6b35, 0.2);
         coinGlow.setDepth(0);
         this.tweens.add({
           targets: coinGlow,
@@ -388,32 +389,6 @@ class GameLevel extends Phaser.Scene {
 
     }
 
-    createHearts(){
-
-    this.heartsGroup = this.physics.add.staticGroup().setDepth(5);
-
-    for (let i = 0; i < this.hearts; i++) {
-        let heart = this.heartsGroup.create(770 - i * 25, 16, 'heart').setDepth(5).setScale(0.1);
-        heart.refreshBody();
-        this.heartsGroup.add(heart);
-    }
-
-    }
-
-     loseHeart() {
-      // Remove the last heart from the group
-      if (this.heartsGroup.getLength() > 0) {
-          let lastHeart = this.heartsGroup.getLast(true);
-          lastHeart.destroy();
-
-          if(this.hearts == 0){
-            this.looseGame();
-          }else{
-           this.playAudio("lose");
-
-          }
-      }
-  }
 
 
     createWalls() {
@@ -584,22 +559,25 @@ class GameLevel extends Phaser.Scene {
 
 
 
-if (this.waterActive && this.waterLevel < this.cameras.main.height) {
-      const char1Bottom = this.character1.y + this.character1.height;
-      const char2Bottom = this.character2.y + this.character2.height;
+if (this.waterActive && this.waterLevel < this.cameras.main.height - 20) {
+      // Use the physics body bottom position for accurate collision
+      const char1Bottom = this.character1.y + (this.character1.body.height * 0.5);
+      const char2Bottom = this.character2.y + (this.character2.body.height * 0.5);
       
-      if (char1Bottom >= this.waterLevel || char2Bottom >= this.waterLevel) {
+      // Water surface with wave consideration (add 4px buffer for waves)
+      const waterSurfaceWithWaves = this.waterLevel - 4;
+      
+      // Only trigger if character's feet are actually submerged in water
+      const char1InWater = char1Bottom > waterSurfaceWithWaves;
+      const char2InWater = char2Bottom > waterSurfaceWithWaves;
+      
+      if (char1InWater || char2InWater) {
+        console.log(`Water collision detected! Water surface: ${waterSurfaceWithWaves.toFixed(0)}, Char1 bottom: ${char1Bottom.toFixed(0)}, Char2 bottom: ${char2Bottom.toFixed(0)}`);
         this.gameOver('drowned');
         return;
       }
     } 
 
-
-
-
-
-
-      //this.dimensionsText.setText(Math.floor(this.character2.x) + " x "+Math.floor(this.character2.y))
 
     }
 
@@ -615,7 +593,7 @@ if (this.waterActive && this.waterLevel < this.cameras.main.height) {
 
     updateWaterLevel() {
       const elapsedTime = Date.now() - this.levelStartTime;
-      const gracePeriod = 10000;
+      const gracePeriod = 5000;
       
       if (elapsedTime < gracePeriod) {
         this.waterActive = false;
@@ -645,7 +623,7 @@ if (this.waterActive && this.waterLevel < this.cameras.main.height) {
     }
 
     updateWaterUI(elapsedTime) {
-      const gracePeriod = 10000;
+      const gracePeriod = 5000;
       
       if (elapsedTime < gracePeriod) {
         const graceRemaining = Math.ceil((gracePeriod - elapsedTime) / 1000);
@@ -687,7 +665,8 @@ if (this.waterActive && this.waterLevel < this.cameras.main.height) {
       this.waterGraphics.clear();
       this.waterSurface.clear();
       
-      if (this.waterLevel < this.cameras.main.height) {
+      // Only render water if grace period is over and water is active
+      if (this.waterActive && this.waterLevel < this.cameras.main.height) {
         this.waterGraphics.fillStyle(0x0064c8, 0.7);
         this.waterGraphics.fillRect(0, this.waterLevel, this.cameras.main.width, this.cameras.main.height - this.waterLevel);
         
@@ -803,26 +782,6 @@ if (this.waterActive && this.waterLevel < this.cameras.main.height) {
 
 
 
-    looseGame(){
-        this.registry.set("currentLevel", 1);
-
-        let currentLevel = this.registry.get("currentLevel") ;
-  
-        scores.push(this.score);
-
-
-          this.registry.set("score", this.score);
-          this.playAudio("gameOverSound");
-          this.scene.stop();
-          this.theme.stop();
-          this.scene.start("gameover", {  scores: scores });
-          scores = []; 
-
-  
-
-
-
-    }
     
   
     finishScene() {
@@ -850,7 +809,7 @@ if (this.waterActive && this.waterLevel < this.cameras.main.height) {
         this.playAudio("levelEnd");
         this.scene.stop();
         this.theme.stop();
-        this.scene.start("nextScenex", { score : this.score, hearts: this.hearts}); 
+        this.scene.start("nextScenex", { score : this.score}); 
       }
 
     }
@@ -867,6 +826,104 @@ if (this.waterActive && this.waterLevel < this.cameras.main.height) {
 
       // Add subtle animated elements
       this.createBackgroundParticles();
+    }
+
+    createRainEffect() {
+      this.raindrops = [];
+      
+      // Create multiple rain layers for depth effect
+      for (let layer = 0; layer < 3; layer++) {
+        const rainGroup = this.add.group();
+        const intensity = layer === 0 ? 60 : layer === 1 ? 40 : 25;
+        const speed = layer === 0 ? 300 : layer === 1 ? 200 : 150;
+        const alpha = layer === 0 ? 0.8 : layer === 1 ? 0.6 : 0.4;
+        const width = layer === 0 ? 2 : layer === 1 ? 1.5 : 1;
+        
+        for (let i = 0; i < intensity; i++) {
+          const x = Phaser.Math.Between(-50, this.cameras.main.width + 50);
+          const y = Phaser.Math.Between(-this.cameras.main.height, 0);
+          
+          // Create raindrop as a line
+          const raindrop = this.add.graphics();
+          raindrop.lineStyle(width, 0x87ceeb, alpha);
+          raindrop.lineBetween(0, 0, 0, 15);
+          raindrop.setPosition(x, y);
+          raindrop.setDepth(layer - 1);
+          raindrop.setScrollFactor(0);
+          
+          rainGroup.add(raindrop);
+          
+          // Animate raindrop falling
+          this.tweens.add({
+            targets: raindrop,
+            x: x - 30,
+            y: this.cameras.main.height + 50,
+            duration: speed + Phaser.Math.Between(-50, 50),
+            ease: 'Linear',
+            repeat: -1,
+            delay: Phaser.Math.Between(0, 2000),
+            onRepeat: () => {
+              // Reset position when raindrop reaches bottom
+              raindrop.setPosition(
+                Phaser.Math.Between(-50, this.cameras.main.width + 50),
+                Phaser.Math.Between(-100, -20)
+              );
+            }
+          });
+        }
+        
+        this.raindrops.push(rainGroup);
+      }
+      
+      // Add rain sound effect (optional)
+      this.createRainSplashes();
+    }
+
+    createRainSplashes() {
+      // Create occasional splash effects when rain hits ground
+      this.time.addEvent({
+        delay: Phaser.Math.Between(800, 1500),
+        callback: () => {
+          const x = Phaser.Math.Between(50, this.cameras.main.width - 50);
+          const y = this.cameras.main.height - 60;
+          
+          // Create small splash particle
+          const splash = this.add.circle(x, y, 2, 0x87ceeb, 0.6);
+          splash.setDepth(3);
+          
+          this.tweens.add({
+            targets: splash,
+            scaleX: 3,
+            scaleY: 0.5,
+            alpha: 0,
+            duration: 300,
+            ease: 'Quad.easeOut',
+            onComplete: () => {
+              splash.destroy();
+            }
+          });
+          
+          // Add small ripple effect
+          for (let i = 0; i < 3; i++) {
+            const ripple = this.add.circle(x, y, 1, 0x87ceeb, 0.3);
+            ripple.setDepth(2);
+            
+            this.tweens.add({
+              targets: ripple,
+              scaleX: 4 + i,
+              scaleY: 4 + i,
+              alpha: 0,
+              duration: 600 + i * 100,
+              ease: 'Quad.easeOut',
+              delay: i * 100,
+              onComplete: () => {
+                ripple.destroy();
+              }
+            });
+          }
+        },
+        loop: true
+      });
     }
 
     createBackgroundParticles() {

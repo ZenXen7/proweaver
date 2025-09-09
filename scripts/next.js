@@ -8,9 +8,7 @@ export default class NextLevel extends Phaser.Scene {
     }
 
     init(data){
-      this.hearts = data.hearts;
       this.previousScore = data.score || 0;
-
     }
 
 
@@ -81,7 +79,7 @@ export default class NextLevel extends Phaser.Scene {
       this.registry.set("currentLevel", this.registry.get("currentLevel")+ 1 ); ;
       let nextLevel = this.registry.get("currentLevel");
       console.log(nextLevel);
-      this.scene.start(`level${nextLevel}`, {hearts:this.hearts});
+      this.scene.start(`level${nextLevel}`);
 
     }
 
