@@ -55,8 +55,12 @@ class CanvasGame {
   setupEventListeners() {
     document.addEventListener('keydown', (e) => {
       this.keys[e.key] = true;
-      if (e.key === ' ' && this.gameState === 'start') {
-        this.startGame();
+      if (e.key === ' ') {
+        if (this.gameState === 'start') {
+          this.startGame();
+        } else if (this.gameState === 'gameOver') {
+          this.restartGame();
+        }
       }
     });
     
@@ -69,6 +73,8 @@ class CanvasGame {
     this.canvas.addEventListener('click', () => {
       if (this.gameState === 'start') {
         this.startGame();
+      } else if (this.gameState === 'gameOver') {
+        this.restartGame();
       }
     });
   }
@@ -121,7 +127,7 @@ class CanvasGame {
           [480, 435, 0.8, 450, 606, 420, 478, 0.2],
           [600, 305, 0.8, 418, 318, 500, 190, 0.2]
         ],
-        timeLimit: 45000,
+        timeLimit: 60000,
         waterRiseSpeed: 0.8
       },
       2: {
@@ -133,7 +139,7 @@ class CanvasGame {
           [440, 465, 0.8, 408, 510, 583, 510, 0.2],
           [215, 83, 0.8, 300, 222, 130, 126, 0.2]
         ],
-        timeLimit: 40000,
+        timeLimit: 50000,
         waterRiseSpeed: 1.0
       },
       3: {
@@ -145,7 +151,7 @@ class CanvasGame {
           [450, 340, 0.8, 177, 253, 475, 382, 0.2],
           [542, 83, 0.8, 713, 254, 410, 158, 0.2]
         ],
-        timeLimit: 35000,
+        timeLimit: 40000,
         waterRiseSpeed: 1.2
       }
     };
@@ -153,6 +159,16 @@ class CanvasGame {
   
   startGame() {
     this.gameState = 'playing';
+    this.initializeLevel(this.currentLevel);
+    this.gameRunning = true;
+    this.startGameLoop();
+  }
+  
+  restartGame() {
+    this.gameState = 'playing';
+    this.currentLevel = 1;
+    this.score = 0;
+    this.hearts = 8;
     this.initializeLevel(this.currentLevel);
     this.gameRunning = true;
   }
@@ -212,7 +228,7 @@ class CanvasGame {
     
     
     this.ground = this.height - 32;
-    this.waterLevel = this.height;
+    this.waterLevel = this.height - 10;
     this.waterRiseSpeed = data.waterRiseSpeed || 0.8;
     this.maxLevelTime = data.timeLimit || 45000;
     this.levelStartTime = Date.now();
@@ -256,8 +272,10 @@ class CanvasGame {
       return;
     }
     
-    const targetWaterLevel = this.height - (timeProgress * (this.height - 100));
-    this.waterLevel = Math.min(this.waterLevel, targetWaterLevel);
+    const startingWaterLevel = this.height - 10;
+    const maxRiseHeight = this.height - 100;
+    const currentRiseHeight = timeProgress * maxRiseHeight;
+    this.waterLevel = startingWaterLevel - currentRiseHeight;
   }
   
   updatePlayers(deltaTime) {
@@ -443,6 +461,8 @@ class CanvasGame {
       this.renderGame();
     } else if (this.gameState === 'complete') {
       this.renderCompleteScreen();
+    } else if (this.gameState === 'gameOver') {
+      this.renderGameOverScreen();
     }
   }
   
@@ -470,15 +490,28 @@ class CanvasGame {
     this.ctx.fillStyle = '#333333';
     this.ctx.fillRect(0, this.ground, this.width, this.height - this.ground);
     
-    this.hazards.fire.forEach(hazard => {
-      this.ctx.fillStyle = '#ff4757';
-      this.ctx.fillRect(hazard.x - hazard.width/2, hazard.y - hazard.height/2, hazard.width, hazard.height);
-    });
-    
-    this.hazards.water.forEach(hazard => {
-      this.ctx.fillStyle = '#3742fa';
-      this.ctx.fillRect(hazard.x - hazard.width/2, hazard.y - hazard.height/2, hazard.width, hazard.height);
-    });
+    if (this.waterLevel < this.height) {
+      this.ctx.fillStyle = 'rgba(0, 100, 200, 0.7)';
+      this.ctx.fillRect(0, this.waterLevel, this.width, this.height - this.waterLevel);
+      
+      this.ctx.fillStyle = 'rgba(0, 150, 255, 0.9)';
+      this.ctx.fillRect(0, this.waterLevel - 8, this.width, 8);
+      
+      for (let i = 0; i < this.width; i += 15) {
+        const waveHeight = Math.sin((Date.now() * 0.008) + (i * 0.03)) * 4;
+        this.ctx.fillStyle = 'rgba(100, 200, 255, 0.95)';
+        this.ctx.fillRect(i, this.waterLevel + waveHeight - 3, 12, 3);
+      }
+      
+      this.ctx.fillStyle = 'rgba(200, 240, 255, 0.3)';
+      for (let i = 0; i < 5; i++) {
+        const bubbleX = (Date.now() * 0.02 + i * 150) % this.width;
+        const bubbleY = this.waterLevel + 20 + Math.sin(Date.now() * 0.003 + i) * 10;
+        this.ctx.beginPath();
+        this.ctx.arc(bubbleX, bubbleY, 2 + Math.sin(Date.now() * 0.01 + i) * 1, 0, Math.PI * 2);
+        this.ctx.fill();
+      }
+    }
     
     this.coins.forEach(coin => {
       if (!coin.collected) {
@@ -549,6 +582,26 @@ class CanvasGame {
     this.ctx.fillStyle = '#4ecdc4';
     this.ctx.textAlign = 'center';
     this.ctx.fillText(`Level ${this.currentLevel}`, this.width/2, 30);
+    
+    const elapsedTime = Date.now() - this.levelStartTime;
+    const remainingTime = Math.max(0, this.maxLevelTime - elapsedTime);
+    const seconds = Math.ceil(remainingTime / 1000);
+    
+    this.ctx.fillStyle = remainingTime < 10000 ? '#ff4757' : '#ffffff';
+    this.ctx.font = 'bold 16px Arial';
+    this.ctx.textAlign = 'left';
+    this.ctx.fillText(`Time: ${seconds}s`, 20, 55);
+    
+    const waterProgress = 1 - ((this.waterLevel - 100) / (this.height - 100));
+    this.ctx.fillStyle = 'rgba(0, 150, 255, 0.8)';
+    this.ctx.fillRect(this.width - 25, 80, 15, 100);
+    this.ctx.fillStyle = 'rgba(0, 100, 200, 0.9)';
+    this.ctx.fillRect(this.width - 23, 80 + (100 * (1 - waterProgress)), 11, 100 * waterProgress);
+    
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = '12px Arial';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText('Water', this.width - 17, 195);
   }
   
   renderCompleteScreen() {
@@ -563,6 +616,29 @@ class CanvasGame {
     this.ctx.fillStyle = '#ffffff';
     this.ctx.font = '20px Arial';
     this.ctx.fillText(`Final Score: ${this.score}`, this.width/2, this.height/2 + 20);
+  }
+  
+  renderGameOverScreen() {
+    this.ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+    this.ctx.fillRect(0, 0, this.width, this.height);
+    
+    this.ctx.fillStyle = '#ff4757';
+    this.ctx.font = 'bold 36px Arial';
+    this.ctx.textAlign = 'center';
+    this.ctx.fillText('GAME OVER', this.width/2, this.height/2 - 60);
+    
+    this.ctx.fillStyle = '#ffffff';
+    this.ctx.font = '20px Arial';
+    
+    if (this.gameOverReason === 'drowned') {
+      this.ctx.fillText('The water caught you!', this.width/2, this.height/2 - 20);
+    } else if (this.gameOverReason === 'timeout') {
+      this.ctx.fillText('Time ran out!', this.width/2, this.height/2 - 20);
+    }
+    
+    this.ctx.fillText(`Score: ${this.score}`, this.width/2, this.height/2 + 10);
+    this.ctx.font = '14px Arial';
+    this.ctx.fillText('PRESS SPACE OR CLICK TO RESTART', this.width/2, this.height/2 + 50);
   }
 }
 
