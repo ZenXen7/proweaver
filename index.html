@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PromptQuest - Proweaver Hackathon</title>
+  <link rel="stylesheet" href="./styles/styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="modern-nav">
+    <div class="nav-container">
+      <div class="nav-brand">
+        <div class="brand-icon">🔥💧</div>
+        <span class="brand-text">Team Fight Club Cebu</span>
+      </div>
+      <div class="nav-menu">
+        <button class="nav-btn" onclick="scrollToSection('home')">Home</button>
+        <button class="nav-btn" onclick="scrollToSection('game')">Play</button>
+      </div>
+    </div>
+  </nav>
+
+  <section id="home" class="hero-section">
+    <div class="hero-background">
+      <div class="gradient-orb orb-1"></div>
+      <div class="gradient-orb orb-2"></div>
+      <div class="gradient-orb orb-3"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge">🎮 Adventure Awaits</div>
+      <h1 class="hero-title">
+        <span class="fire-text">Fire</span> & <span class="water-text">Water</span>
+        <br>Elemental Adventure
+      </h1>
+      <p class="hero-description">
+        Master the elements in this modern puzzle-platformer. Control both characters 
+        to solve puzzles, collect gems, and navigate through challenging levels.
+      </p>
+      <div class="hero-actions">
+        <button class="cta-button primary" onclick="scrollToSection('game')">
+          Start Adventure
+          <span class="button-arrow">→</span>
+        </button>
+        <button class="cta-button secondary" onclick="scrollToSection('game')">
+          Quick Play
+        </button>
+      </div>
+    </div>
+  </section>
+
+
+  <section id="game" class="game-section">
+    <div class="game-header">
+      <h2 class="game-title">Adventure Mode</h2>
+      <div class="game-stats">
+        <div class="stat-item">
+          <span class="stat-label">Level</span>
+          <span class="stat-value" id="current-level">1</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-label">Score</span>
+          <span class="stat-value" id="current-score">0</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="game-container">
+      <div id="gameContainer" class="game-canvas"></div>
+      
+      <div class="game-controls">
+        <div class="controls-section">
+          <div class="control-group fire-controls">
+            <div class="player-label">
+              <span class="player-icon">🔥</span>
+              Fire Player
+            </div>
+            <div class="control-keys">
+              <div class="key-group">
+                <span class="key">←</span>
+                <span class="key">→</span>
+                <span class="key">↑</span>
+              </div>
+              <span class="control-desc">Arrow Keys</span>
+            </div>
+          </div>
+
+          <div class="control-group water-controls">
+            <div class="player-label">
+              <span class="player-icon">💧</span>
+              Water Player
+            </div>
+            <div class="control-keys">
+              <div class="key-group">
+                <span class="key">A</span>
+                <span class="key">D</span>
+                <span class="key">W</span>
+              </div>
+              <span class="control-desc">WASD Keys</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="touch-controls" class="mobile-controls">
+      <div class="touch-controls-player">
+        <div class="player-controls">
+          <span class="control-label">🔥 Fire</span>
+          <div class="touch-buttons">
+            <button id="left1" class="touch-btn">
+              <span class="touch-icon">←</span>
+            </button>
+            <button id="right1" class="touch-btn">
+              <span class="touch-icon">→</span>
+            </button>
+            <button id="up1" class="touch-btn jump">
+              <span class="touch-icon">↑</span>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="touch-controls-player">
+        <div class="player-controls">
+          <span class="control-label">💧 Water</span>
+          <div class="touch-buttons">
+            <button id="left2" class="touch-btn">
+              <span class="touch-icon">←</span>
+            </button>
+            <button id="right2" class="touch-btn">
+              <span class="touch-icon">→</span>
+            </button>
+            <button id="up2" class="touch-btn jump">
+              <span class="touch-icon">↑</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="modern-footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <div class="brand-icon">🔥💧</div>
+        <span>Elemental Duo</span>
+      </div>
+      <p class="footer-text">A modern take on the classic puzzle-platformer adventure</p>
+    </div>
+  </footer>
+  <script src="scripts/main.js"></script>
+  <script src="./scripts/phaser.min.js"></script>
+  <script type="module" src="scripts/game.js"></script>
+</body>
+</html>
