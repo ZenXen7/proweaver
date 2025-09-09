@@ -3,6 +3,10 @@ export default class GameOver extends Phaser.Scene {
         super({ key: "gameover" });
     }
 
+    preload() {
+        this.load.bitmapFont("arcade", "./assets/images/arcade.png", "./assets/arcade.xml");
+    }
+
     init(data) {
         this.scores = data.scores;
         this.gameOverReason = data.reason || 'default';

@@ -4,7 +4,7 @@ export default class NextLevel extends Phaser.Scene {
     }
   
     preload() {
-      this.load.bitmapFont("arcade", "assets/arcade.png", "assets/arcade.xml");
+      this.load.bitmapFont("arcade", "./assets/images/arcade.png", "./assets/arcade.xml");
     }
 
     init(data){

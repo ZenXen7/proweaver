@@ -3,6 +3,10 @@ export default class End extends Phaser.Scene {
         super({ key: "end" });
     }
 
+    preload() {
+        this.load.bitmapFont("arcade", "./assets/images/arcade.png", "./assets/arcade.xml");
+    }
+
     init(data) {
         this.scores = data.scores;
         console.log(data)

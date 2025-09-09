@@ -88,7 +88,7 @@ var config = {
       debug: false,
     },
   },
-  scene: [GameStart, GameLevel1, NextLevel, GameLevel2, GameLevel3,end, GameOver],
+  scene: [GameStart, GameLevel1, NextLevel, GameLevel2, GameLevel3, end, GameOver]
 };
 
 var game = new Phaser.Game(config);

@@ -5,7 +5,7 @@ export default class GameStart extends Phaser.Scene {
     }
 
     preload() {
-        this.load.bitmapFont("arcade", "assets/images/arcade.png", "assets/arcade.xml");
+        this.load.bitmapFont("arcade", "./assets/images/arcade.png", "./assets/arcade.xml");
     }
 
     create() {

@@ -23,8 +23,8 @@ class GameLevel extends Phaser.Scene {
       this.load.image("tileset", "./assets/images/tile-new.png");
       this.load.image("background", "./assets/images/Ground.png");
 
-      this.load.image("character1", "assets/images/worker-final.png");
-      this.load.image("character2", "assets/images/woman.png");
+      this.load.image("character1", "./assets/images/worker-final.png");
+      this.load.image("character2", "./assets/images/woman.png");
 
       this.load.audio("coin", "./assets/audio/coin.mp3");
       this.load.audio("jump", "./assets/audio/jump.mp3");
@@ -35,13 +35,13 @@ class GameLevel extends Phaser.Scene {
       this.load.image("coin2", "./assets/images/cash.png");
       this.load.image("wall", "./assets/images/Wall.png");
       this.load.image("wallBtn", "./assets/images/wallBtn.png");
-      this.load.image("heart" , "../assets/images/heart.png")
-      this.load.image("door" , "../assets/images/door.png")
+      this.load.image("heart" , "./assets/images/heart.png");
+      this.load.image("door" , "./assets/images/door.png");
       
-      this.load.audio("wallOpen" , "../assets/audio/wallOpen.mp3")
-      this.load.audio("wallClose" , "../assets/audio/wallClose.mp3")
-      this.load.audio("lose" , "../assets/audio/lose.mp3")
-      this.load.audio("gameOverSound" , "../assets/audio/gameOver.mp3")
+      this.load.audio("wallOpen" , "./assets/audio/wallOpen.mp3");
+      this.load.audio("wallClose" , "./assets/audio/wallClose.mp3");
+      this.load.audio("lose" , "./assets/audio/lose.mp3");
+      this.load.audio("gameOverSound" , "./assets/audio/gameOver.mp3");
       
 
       this.load.tilemapCSV("tilemap1", "./assets/maps/LEVEL1.csv");
